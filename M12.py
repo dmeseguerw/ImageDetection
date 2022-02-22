@@ -176,9 +176,9 @@ def get_size(img):
 
 
 def divide_image(img):
-    for r in range(600, img.shape[0]-1200, 650):
-        for c in range(650, img.shape[1]-1100, 650):
-            cv2.imwrite("Imag/"+f"img{r}_{c}.png", img[r:r + 650, c:c + 650, :])
+    for r in range(600, img.shape[0] - 1200, 650):
+        for c in range(650, img.shape[1] - 1100, 650):
+            cv2.imwrite("Imag/" + f"img{r}_{c}.png", img[r:r + 650, c:c + 650, :])
 
 
 
