@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-from tkinter import Tk
+from tkinter import *
 import math
 import argparse
 from tkinter.filedialog import askopenfilename
@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 # Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
 # filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
 # print(filename)
+
 
 # Method used to keep only reasonable matches
 def filter_distance(mtc):
@@ -47,7 +48,7 @@ def check_matches(list1,pts,rad):
         res = check_point(i,pts,rad)
         if(res):
             trueCtr = trueCtr + 1
-
+        # print_data(trueCtr, len(list1))
     if trueCtr >= 0.9*len(list1): 
         print_data(trueCtr, len(list1))
         return True
@@ -98,20 +99,20 @@ def analyze_all(fpath,sel):
     for dirName, subDirs, files in fpath:
         for f in files:
             templates.append('Segments/' + f)
-
+    img2 = cropped
+    orb = cv2.ORB_create(
+            edgeThreshold=7, patchSize=20, nlevels=8,
+            fastThreshold=7, scaleFactor=1.2, WTA_K=2, scoreType=cv2.ORB_HARRIS_SCORE,
+            firstLevel=0, nfeatures=1000)  # initialize ORB object
+    kp2, des2 = orb.detectAndCompute(img2, None)  # Get keypoints and descriptors for template image
     for image in templates:
         im1 = cv2.imread(image)
 
         # img1 = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
         # img2 = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
         img1 = im1
-        img2 = cropped
-        orb = cv2.ORB_create(
-            edgeThreshold=7, patchSize=20, nlevels=8,
-            fastThreshold=7, scaleFactor=1.2, WTA_K=2, scoreType=cv2.ORB_HARRIS_SCORE,
-            firstLevel=0, nfeatures=1000)  # initialize ORB object
+
         kp1, des1 = orb.detectAndCompute(img1, None)  # Get keypoints and descriptors for image
-        kp2, des2 = orb.detectAndCompute(img2, None)  # Get keypoints and descriptors for template image
 
         # Create matches and sort them
         matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
@@ -169,7 +170,6 @@ def select_option():
         print("Seleccionando patron...")
         cv2.namedWindow("image")
         cv2.setMouseCallback("image", shape_selection)
-
 
         # keep looping until the 'c' key is pressed
         while True:
@@ -241,16 +241,15 @@ def shape_selection(event, x, y, flags, param):
         cv2.rectangle(image, ref_point[0], ref_point[1], (0, 255, 0), 2)
         cv2.imshow("image", image)
 
-
 # construct the argument parser and parse the arguments
 # ap = argparse.ArgumentParser()
 # ap.add_argument("-i", "--image", required=True, help="Path to the image")
 # args = vars(ap.parse_args())
 
+
 # load the image, clone it, and setup the mouse callback function
 image = [[0]*2 for _ in range(3)]
 patternImage = ""
 clone = image.copy()
-
-
 select_option()
+
