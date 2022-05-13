@@ -11,6 +11,33 @@ from matplotlib import pyplot as plt
 # filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
 # print(filename)
 
+def drawlocation():
+    organism = input("Ingrese organismo: ")
+    path = os.walk(organism+"_Matches")
+    matches = []
+    for dirName, subDirs, files in path:
+        for f in files:
+            matches.append(organism+'_Matches/' + f)
+    new_matches = []
+    musas_orig = cv2.imread("Images/UVF_MI_Final.jpg")
+    cv2.imwrite("Images/UVF_MI_Final_copy_" + organism + ".jpg", musas_orig)
+    musas = cv2.imread("Images/UVF_MI_Final_copy_" + organism + ".jpg")
+    for i in matches:
+        new_string = i.replace(organism+"_Matches/matches_img","")
+        new_string = new_string.replace(".png","")
+        new_string = new_string.replace("x",",")
+        new_string = new_string.replace("_",",")
+        coords = new_string.split(',')
+        new_matches.append(coords)
+        # print(new_matches)
+        coords = [int(i) for i in coords]
+        print(coords)
+        found = cv2.rectangle(musas, [coords[2],coords[0]], [coords[3],coords[1]], (0, 255, 0), 20)
+        found = cv2.putText(found, organism, (coords[2]+300,coords[0]+400), cv2.FONT_HERSHEY_SIMPLEX, 
+                    8, (0, 255, 0), 15, cv2.LINE_AA)
+        cv2.imwrite("Images/UVF_MI_Final_copy_" + organism + ".jpg", found)
+        print("Drawn")
+
 
 # Method used to keep only reasonable matches
 def filter_distance(mtc):
@@ -49,7 +76,7 @@ def check_matches(list1,pts,rad):
         if(res):
             trueCtr = trueCtr + 1
         # print_data(trueCtr, len(list1))
-    if trueCtr >= 0.9*len(list1): 
+    if trueCtr >= 0.8*len(list1): 
         print_data(trueCtr, len(list1))
         return True
     else: 
@@ -120,7 +147,7 @@ def analyze_all(fpath,sel):
         if len(matches) > 25:
             matches = sorted(matches, key=lambda x: x.distance)  # sorted matches
             matches = filter_distance(matches)
-        if len(matches) > 25:
+        if len(matches) > 15:
             list_kp1 = [kp1[mat.queryIdx].pt for mat in matches]  # coordinates of all matches in segment
             x1, y1 = get_middle(list_kp1)
             ref_point_aux = rect_center(ref_point, [x1, y1])
@@ -190,7 +217,7 @@ def select_option():
         select_option()
     if(sel=="2"):
         print("Segmentando imagen...")
-        im1 = cv2.imread('Images/UVF_MI_FinalJPEG.jpg')
+        im1 = cv2.imread('Images/UVF_MII_Final.jpg')
         divide_image(im1)
         select_option()
     if(sel=="4"):
@@ -204,6 +231,9 @@ def select_option():
         print(ref_point)
         analyze_all(path,sel)
         select_option()
+    if(sel=="5"):
+        drawlocation()
+        select_option()
     return sel
 
 # Method used to retrieve image size
@@ -214,8 +244,8 @@ def get_size(img):
 
 # Method used to divide image into segments
 def divide_image(img):
-    for r in range(0, img.shape[0] - 750, 650):
-        for c in range(0, img.shape[1] - 750, 650):
+    for r in range(0, img.shape[0] - 750, 450):
+        for c in range(0, img.shape[1] - 750, 450):
             cv2.imwrite("Segments/" + f"img{r}x{r+750}_{c}x{c+750}.png", img[r:r + 750, c:c + 750, :])
 
 # now let's initialize the list of reference point
